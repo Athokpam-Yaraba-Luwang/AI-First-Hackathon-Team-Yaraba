@@ -28,7 +28,7 @@ This project leverages the Arduino UNO Q's unique hardware:
 
 ### 🛠️ Hardware Stack
 *   **Core Board:** Arduino UNO Q (Qualcomm Linux + STM32)
-*   **Sensors:** Flame Sensor, Sound (Acoustic Anomaly), Touch/Aerial Object Sensor, LDR (Day/Night state)
+*   **Sensors:** Flame Sensor, Button as sound sensor Sound (Acoustic Anomaly), Touch imitating radar for Aerial Object Sensor, LDR (Day/Night state) - Some sensor are replaced with simpler sensors for prototyping
 *   **Actuators:** 180° Servo (Sprinkler targeting), Piezo Buzzer (Siren), RGB LED (Visual alert state), I2C OLED (Explainable AI reasoning output)
 *   **Manual Override:** Analog Joystick
 
@@ -36,7 +36,7 @@ This project leverages the Arduino UNO Q's unique hardware:
 *   **AI Engine:** Quantized LLM hosted locally via standard REST API (`http://127.0.0.1:8080`).
 *   **Bridge Layer:** Python (`main.py`) monitoring telemetry, prompting the LLM, sanitizing outputs, and enforcing the Guarded Agent Workflow.
 *   **Microcontroller:** C++ (`sketch.ino`) managing GPIO, hardware interrupts, and OLED display rendering.
-*   **Interface:** Lightweight Web UI for manual system queries and status checks.
+*   **Interface:** Lightweight HTML Web UI for manual system queries and status checks.
 
 ---
 
