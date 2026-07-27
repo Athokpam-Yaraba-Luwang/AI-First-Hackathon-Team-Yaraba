@@ -42,10 +42,16 @@ This project leverages the Arduino UNO Q's unique hardware:
 
 ## 🚀 Installation & Usage
 
-**1. MCU Setup**
-Upload the C++ Sketch to the STM32 layer of the Arduino UNO Q using the Arduino App Lab or IDE.
+**1. Microcontroller Setup**
+Upload the provided `sketch.ino`, Python, HTML, and necessary library files to the Arduino board to initialize the real-time sensor polling and hardware interrupt logic.
 
-**2. SBC Setup**
-Ensure your local LLM server is running. Then, SSH into the Qualcomm Linux layer and run the bridge:
-```bash
-python3 main.py
+**2. Decision Engine Setup**
+Ensure your local LLM server is running and accessible. Then, click run in the App Lab UI.
+
+**3. Operation**
+*   **Autonomous Mode:** The system will monitor the sensors. If a hazard trips, it opens a 5-second confirmation window, sends the data to the engine, prints the reasoning to the OLED, and safely triggers the physical deterrents.
+*   **Manual Mode:** Grabbing the joystick instantly severs the system's control over the servo actuator, returning absolute hardware control to the human operator.
+
+---
+
+*This project was built for the 2026 Edge AI Hackathon by Team Yaraba.*
