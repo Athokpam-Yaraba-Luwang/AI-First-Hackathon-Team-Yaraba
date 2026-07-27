@@ -13,8 +13,9 @@ COOLDOWN = 2            # small gap after a decision before resuming monitoring
 
 
 def query_engine(prompt):
-    payload = {"messages": [{"role": "user", "content": prompt}], "max_tokens": 100}
-    r = requests.post(LLAMA_URL, json=payload, timeout=180)
+    payload = {"messages": [{"role": "user", "content": prompt}], "max_tokens": 500}
+    # Increased timeout to 600 seconds so the local LLM has time to write long answers
+    r = requests.post(LLAMA_URL, json=payload, timeout=600)
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"].strip()
 
@@ -32,14 +33,22 @@ def parse_state(raw):
 
 
 def run_decision_engine(latched, day):
-    # Formulate the condition matrix for the logic engine
+    # --- CRITICAL FIX: Python does the logic instead of trusting the LLM ---
+    active_hazards = []
+    if latched['fire']: active_hazards.append("a Fire")
+    if latched['aerial']: active_hazards.append("an Aerial Threat")
+    if latched['sound']: active_hazards.append("a Loud Acoustic Anomaly")
+    
+    # Join them together (e.g., "an Aerial Threat and a Loud Acoustic Anomaly")
+    hazard_str = " and ".join(active_hazards) if active_hazards else "an Unknown Anomaly"
+
+    # Now we explicitly tell the LLM exactly what happened so it cannot hallucinate
     prompt = (
-        f"Sensor Data: fire={latched['fire']}, aerial_object={latched['aerial']}, "
-        f"sound_anomaly={latched['sound']}, daytime={day}. (1 = danger). "
-        "You are a security system. If any hazard is 1, your action is SPRINKLE. "
+        f"You are a security system. The following hazard was detected: {hazard_str}. "
+        "Your action is SPRINKLE. "
         "You MUST answer in exactly ONE continuous line of text. No line breaks. "
         "Format exactly like this: "
-        "DECISION: SPRINKLE. REASON: [Write a descriptive 15 to 20 word sentence using natural language to explain exactly which hazard was detected and why the sprinkler was activated.]"
+        f"DECISION: SPRINKLE. REASON: [Write a descriptive 15 to 20 word sentence using natural language explaining that {hazard_str} triggered the system and the sprinkler was activated.]"
     )
 
     Bridge.call("display_thinking")
@@ -52,7 +61,6 @@ def run_decision_engine(latched, day):
 
     decision = "SPRINKLE" if "SPRINKLE" in answer.upper() else "IDLE"
     
-    # --- CRITICAL FIX ---
     # Strip out all newlines (\n) so the Arduino OLED can wrap the text without glitching
     clean_answer = answer.replace("\n", " ").replace("\r", " ").strip()
     
@@ -64,7 +72,6 @@ def run_decision_engine(latched, day):
 
     print(f"[Engine] decision={decision} | fire={latched['fire']} aerial={latched['aerial']} "
           f"sound={latched['sound']} day={day}")
-
 
 def monitor_loop():
     while True:
